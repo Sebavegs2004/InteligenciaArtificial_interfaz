@@ -138,7 +138,7 @@ class Simulation:
 
         self.start_ticks = pygame.time.get_ticks()
         sound = ResourceManager.sound_load('go123.mp3')
-        sound.set_volume(0.5)
+        sound.set_volume(0.3)
         sound.play()
         self.prize = pygame.transform.scale(ResourceManager.image_load('premio.png'), (self.size_tile, self.size_tile))
 
@@ -150,7 +150,6 @@ class Simulation:
         chromosome_length = 100
         mutation_rate = 0.01
         crossover_rate = 0.4
-
         genetic = GeneticAlgorithm(size, population_size, num_generations, chromosome_length, mutation_rate, crossover_rate)
         results = genetic.run()
         self.prize_activated = False
@@ -188,10 +187,6 @@ class Simulation:
         sound.set_volume(0.5)
         sound.play()
         self.prize = pygame.transform.scale(ResourceManager.image_load('premio.png'), (self.size_tile, self.size_tile))
-
-
-
-
 
     def reload_map(self):
         if self.iteracion < len(self.walls):

@@ -52,11 +52,6 @@ class GeneticAlgorithm:
         self.board = add_random_obstacles(self.board, map_value(self.size_board), self.start, self.goal, self.fake_goals)
         self.boards.append(self.board)
 
-        # Crear tableros con obstaculos dinamicos
-        for i in range (chromosome_length):
-            self.board = add_random_obstacles(self.board, map_value(self.size_board), self.start, self.goal)
-            self.boards.append(np.copy(self.board))
-
         self.population_size = population_size
         self.num_generations = num_generations
         self.chromosome_length = chromosome_length
