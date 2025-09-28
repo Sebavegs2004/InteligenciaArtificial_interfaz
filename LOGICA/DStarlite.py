@@ -2,6 +2,7 @@ import heapq
 import math
 import numpy as np
 import random
+import os
 
 
 def add_random_obstacles(grid, prob, start, goal):
@@ -186,19 +187,22 @@ class DStarLite:
 
 def run_DStarlite(size):
     while True:
+        os.system('cls')
+        print(f'NUEVA ITERACION {'-'*50}')
         grid = np.zeros((size, size), dtype=int)
         start = (0,0)
-        goal = (random.randint(9, size - 1), random.randint(9, size - 1))
+        goal = (random.randint(4, size - 1), random.randint(4, size - 1))
 
         grids = []  # lista de tableros
         jugadas = []
         while goal == start:
             goal = (random.randint(0, size - 1), random.randint(0, size - 1))
         current_start = start
-
+        
         grid = add_random_obstacles(grid, prob=map_value(size), start=current_start, goal=goal)
         grids.append(np.copy(grid))
-
+        print(current_start)
+        print(grid)
         dstar = DStarLite(grid, current_start, goal)
         path = dstar.plan()
         caminos = []
@@ -206,9 +210,13 @@ def run_DStarlite(size):
             for step in path[1:]:
                 current_start = step
                 jugadas.append(step)
-
-                grid = move_obstacles(grid, prob=0.2, start=current_start, goal=goal)
+                print(step)
+                if grid[step[0]][step[1]] == 1:
+                    print("ENCIMMMMMMAAAAAA DE MUROOOOOOOOOOOOO")
+                grid = move_obstacles(grid, prob=0.5, start=current_start, goal=goal)
                 grids.append(np.copy(grid))
+                print(grid)
+    
                 dstar = DStarLite(grid, current_start, goal)
                 new_path = dstar.plan()
                 if new_path is None:
@@ -226,6 +234,6 @@ def run_DStarlite(size):
     return (start, goal, jugadas, grids)
 
 def map_value(x):
-    x1, x2 = 10, 50
-    y1, y2 = 0.4, 0.05
+    x1, x2 = 5, 50
+    y1, y2 = 0.5, 0.05
     return y1 + (x - x1) * (y2 - y1) / (x2 - x1)
