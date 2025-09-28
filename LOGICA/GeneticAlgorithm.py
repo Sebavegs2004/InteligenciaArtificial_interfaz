@@ -196,7 +196,7 @@ class GeneticAlgorithm:
         for i in range(self.num_generations):
             # Calcular fitness de cada cromosoma, guardar si llego a la meta o no
             for chromosome in self.population:
-                score, reached = self.fitness_func(chromosome)
+                score, reached= self.fitness_func(chromosome)
                 fitness_population.append(score)
                 reached_population.append(reached)
 
@@ -208,12 +208,14 @@ class GeneticAlgorithm:
                 if reached:
                     best_fit = fitness
                     best_chromosome = chromosome[:] # guardamos una copia, chromosome original puede variar
+                    best_path = path[:]
                     print("win")
-                    return (self.start, self.goal, best_chromosome, self.boards)
+                    return (self.start, self.goal, best_path, self.boards)
 
                 elif fitness>best_fit:
                     best_fit = fitness
                     best_chromosome = chromosome[:]
+                    best_path = path[:]
 
 
             new_population = []
@@ -228,4 +230,4 @@ class GeneticAlgorithm:
                     new_population.append(child2)
 
 
-        return (self.start, self.goal, best_chromosome, self.boards)
+        return (self.start, self.goal, best_path, self.boards)
