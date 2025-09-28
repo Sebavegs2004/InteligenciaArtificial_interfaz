@@ -2,11 +2,11 @@ import random
 import numpy as np
 from constants import CellType
 
-def add_random_obstacles(grid, prob, start, goal):
+def add_random_obstacles(grid, prob, start, goal, fake):
     size_x, size_y = grid.shape
     for x in range(size_x):
         for y in range(size_y):
-            if (x, y) != start and (x, y) != goal:
+            if (x, y) != start and (x, y) != goal and (x,y) not in fake:
                 if random.random() < prob:
                     grid[x][y] = 1
                 else:
@@ -49,6 +49,8 @@ class GeneticAlgorithm:
             self.goal = (random.randint(0, size - 1), random.randint(0, size - 1))
 
         self.fake_goals = add_fake_goals(self.board, 2, self.start, self.goal)
+        self.board = add_random_obstacles(self.board, map_value(self.size_board), self.start, self.goal, self.fake_goals)
+        self.boards.append(self.board)
 
         # Crear tableros con obstaculos dinamicos
         for i in range (chromosome_length):
@@ -107,14 +109,11 @@ class GeneticAlgorithm:
                 else:
                     x, y = new_x, new_y
                     path.append((x,y))
-                    print(x,y)
                     if (x,y) == self.goal:
-                        print("goal")
                         reached = True
                         steps+=1
                         break
                     elif (x,y) == self.fake_goals:
-                        print("fake_goal")
                         penalties += 2
             steps+=1
             i+=1
@@ -209,7 +208,6 @@ class GeneticAlgorithm:
                     best_fit = fitness
                     best_chromosome = chromosome[:] # guardamos una copia, chromosome original puede variar
                     best_path = path[:]
-                    print("win")
                     return (self.start, self.goal, best_path, self.boards)
 
                 elif fitness>best_fit:

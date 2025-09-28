@@ -159,6 +159,8 @@ class Simulation:
         self.iteracion = 0
         self.simulation = 'genetic'
         self.end = results[1]
+        print(len(results[2]))
+        print(len(results[3]))
         self.size = size
         self.walls = results[3]
         self.map = np.zeros((size + 2, size + 2), dtype=int)
@@ -186,8 +188,6 @@ class Simulation:
         sound.set_volume(0.5)
         sound.play()
         self.prize = pygame.transform.scale(ResourceManager.image_load('premio.png'), (self.size_tile, self.size_tile))
-        os.system('cls')
-        print(results[2])
 
 
 
