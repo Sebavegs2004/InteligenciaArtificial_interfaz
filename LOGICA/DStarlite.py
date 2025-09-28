@@ -202,23 +202,23 @@ def run_DStarlite(size):
         grid = add_random_obstacles(grid, prob=map_value(size), start=current_start, goal=goal)
         grids.append(np.copy(grid))
         print(current_start)
-        print(grid)
+        print(grid) # Mapa
         dstar = DStarLite(grid, current_start, goal)
-        path = dstar.plan()
+        path = dstar.plan() # Pensar
         caminos = []
         if path is not None:
             for step in path[1:]:
-                current_start = step
+                current_start = step # Moverse
                 jugadas.append(step)
                 print(step)
                 if grid[step[0]][step[1]] == 1:
                     print("ENCIMMMMMMAAAAAA DE MUROOOOOOOOOOOOO")
-                grid = move_obstacles(grid, prob=0.5, start=current_start, goal=goal)
+                grid = move_obstacles(grid, prob=0.5, start=current_start, goal=goal) # Mapa
                 grids.append(np.copy(grid))
                 print(grid)
     
                 dstar = DStarLite(grid, current_start, goal)
-                new_path = dstar.plan()
+                new_path = dstar.plan() # Pensar
                 if new_path is None:
                     break
                 else:
