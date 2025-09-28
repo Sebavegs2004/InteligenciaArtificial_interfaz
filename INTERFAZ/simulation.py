@@ -44,10 +44,15 @@ class Simulation:
                 surface.blit(self.tile_sprites[self.map[x][y]], (46 + y * self.size_tile, 22 + x * self.size_tile))
         if self.running == 1:
             if self.agent.move():
-                self.iteracion = self.iteracion + 1
-                self.reload_map()
+                self.start_ticks = pygame.time.get_ticks()
+                self.running = 2
+    
         if self.running == 0 and pygame.time.get_ticks() - self.start_ticks >= 3000:
             ResourceManager.music_load('death_report.mp3')
+            self.running = 1
+        if self.running == 2 and pygame.time.get_ticks() - self.start_ticks >= 300:
+            self.iteracion = self.iteracion + 1
+            self.reload_map()
             self.running = 1
 
         surface.blit(self.prize, (46 + (self.end[1] + 1) * self.size_tile, 22 + (self.end[0] + 1) * self.size_tile))
@@ -153,7 +158,6 @@ class Simulation:
         genetic = GeneticAlgorithm(size, population_size, num_generations, chromosome_length, mutation_rate, crossover_rate)
         results = genetic.run()
         print(results[2])
-        print(results[3])
         self.prize_activated = False
         self.surface = surface
         self.running = 0
@@ -161,7 +165,6 @@ class Simulation:
         self.simulation = 'genetic'
         self.end = results[1]
         print(len(results[2]))
-        print(len(results[3]))
         self.size = size
         self.walls = results[3]
         self.map = np.zeros((size + 2, size + 2), dtype=int)
