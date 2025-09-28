@@ -118,7 +118,6 @@ class Simulation:
         self.map = np.zeros((size + 2, size + 2), dtype=int)
         self.size_map = len(self.map[0])
         self.size_tile = int(676 / self.size_map)
-        print(results[2])
         self.set_borders()
         for x in range(size):
             for y in range(size):
@@ -146,13 +145,15 @@ class Simulation:
         surface.blit(ResourceManager.image_load('loading.png').convert_alpha(), (400,240))
         pygame.display.flip()
         population_size = 50
-        num_generations = 50
-        chromosome_length = 100
+        num_generations = 10
+        chromosome_length = 50
         mutation_rate = 0.01
         crossover_rate = 0.4
 
         genetic = GeneticAlgorithm(size, population_size, num_generations, chromosome_length, mutation_rate, crossover_rate)
         results = genetic.run()
+        print(results[2])
+        print(results[3])
         self.prize_activated = False
         self.surface = surface
         self.running = 0

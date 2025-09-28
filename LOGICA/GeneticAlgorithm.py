@@ -2,16 +2,34 @@ import random
 import numpy as np
 from constants import CellType
 
-def add_random_obstacles(grid, prob, start, goal, fake):
+def add_random_obstacles(grid, prob, start, goal, fake_goals):
     size_x, size_y = grid.shape
     for x in range(size_x):
         for y in range(size_y):
-            if (x, y) != start and (x, y) != goal and (x,y) not in fake:
+            if (x, y) != start and (x, y) != goal and (x,y) not in fake_goals:
                 if random.random() < prob:
                     grid[x][y] = 1
                 else:
                     grid[x][y] = 0
     return grid
+
+def move_obstacles(grid, prob, start, goal, fake_goals):
+    size_x, size_y = grid.shape
+    obstacles = [(x, y) for x in range(size_x) for y in range(size_y) if grid[x][y] == 1]
+
+    for x, y in obstacles:
+        if random.random() < prob:
+            directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+            random.shuffle(directions)
+            for dx, dy in directions:
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < size_x and 0 <= ny < size_y:
+                    if grid[nx][ny] == 0 and (nx, ny) != start and (nx, ny) != goal and (nx, ny) not in fake_goals:
+                        grid[nx][ny] = 1
+                        grid[x][y] = 0
+                        break
+    return grid
+
 
 def add_fake_goals(grid, exit_count, start, goal):
     size_x, size_y = grid.shape
@@ -19,7 +37,7 @@ def add_fake_goals(grid, exit_count, start, goal):
     for _ in range(exit_count - 1):
         fake_pos = [random.randint(0, size_x - 1), random.randint(0, size_y - 1)]
         while fake_pos == start or fake_pos == goal or fake_pos in fake_goals:
-            pos_salida = [random.randint(0, size_x - 1), random.randint(0, size_y - 1)]
+            fake_pos = [random.randint(0, size_x - 1), random.randint(0, size_y - 1)]
         fake_goals.append(fake_pos)
     return fake_goals
 
@@ -44,22 +62,15 @@ class GeneticAlgorithm:
         self.start = (0,0)
         self.goal = (random.randint(9, size - 1), random.randint(9, size - 1))
         self.boards = []
-
         while self.goal == self.start:
             self.goal = (random.randint(0, size - 1), random.randint(0, size - 1))
 
         self.fake_goals = add_fake_goals(self.board, 2, self.start, self.goal)
         self.board = add_random_obstacles(self.board, map_value(self.size_board), self.start, self.goal, self.fake_goals)
-        self.boards.append(self.board)
-
-        # Crear tableros con obstaculos dinamicos
-        for i in range (chromosome_length):
-            self.board = add_random_obstacles(self.board, map_value(self.size_board), self.start, self.goal)
-            self.boards.append(np.copy(self.board))
 
         self.population_size = population_size
         self.num_generations = num_generations
-        self.chromosome_length = chromosome_length
+        self.chromosome_length = chromosome_length - 1 # Debe ser -1 porque son movimientos, y nuestro path debe tener largo chromosome_length
         self.crossover_rate = crossover_rate
         self.mutation_rate = mutation_rate
         self.population = self.generate_initial_population()
@@ -85,16 +96,16 @@ class GeneticAlgorithm:
             population.append(chromosome)
         return population
 
-    def simulate_chromosome(self, chromosome):
+    def simulate_chromosome(self, chromosome, board):
         (x, y) = self.start
-        path = [(x, y)]
+        path = []
         penalties = 0
         steps = 0
         reached = False
         i=0
+        boards = [np.copy(board)]
 
         for gene in chromosome:
-            board = self.boards[i]
             x_mov, y_mov = gene
             new_x, new_y = x + x_mov, y + y_mov
 
@@ -118,10 +129,14 @@ class GeneticAlgorithm:
             steps+=1
             i+=1
 
-        return (x,y), path, penalties, steps, reached
+            # Mover obstaculos
+            board = move_obstacles(board, 0.2, (x, y), self.goal, self.fake_goals)
+            boards.append(np.copy(board))
 
-    def fitness_func(self, chromosome):
-        (x,y), path, penalties, steps, reached = self.simulate_chromosome(chromosome)
+        return (x,y), path, penalties, steps, reached, boards
+
+    def fitness_func(self, pos_final, penalties, steps, reached):
+        (x,y) = pos_final
         # Distancia Manhattan
         x_final, y_final = self.goal
         dist = abs(x - x_final) + abs (y - y_final)
@@ -135,7 +150,7 @@ class GeneticAlgorithm:
         if score < 1:
             score = 1
 
-        return score, reached
+        return score
 
     def select_parent(self, fitness_population):
         total = sum(fitness_population)
@@ -194,26 +209,25 @@ class GeneticAlgorithm:
 
         for i in range(self.num_generations):
             # Calcular fitness de cada cromosoma, guardar si llego a la meta o no
+            j=0
             for chromosome in self.population:
-                score, reached= self.fitness_func(chromosome)
-                fitness_population.append(score)
-                reached_population.append(reached)
 
-            # Revisar si algun cromosoma llegó a la meta, quedarnos con el mejor camino cada vez
-            for i in range(self.population_size):
-                chromosome = self.population[i]
-                fitness = fitness_population[i]
-                (x,y), path, penalties, steps, reached = self.simulate_chromosome(chromosome)
+                (x,y), path, penalties, steps, reached, boards = self.simulate_chromosome(chromosome, np.copy(self.board))
+                score = self.fitness_func((x,y), penalties, steps, reached)
+                j+=1
+
                 if reached:
-                    best_fit = fitness
+                    best_fit = score
                     best_chromosome = chromosome[:] # guardamos una copia, chromosome original puede variar
                     best_path = path[:]
+                    self.boards = [np.copy(b) for b in boards]
                     return (self.start, self.goal, best_path, self.boards)
 
-                elif fitness>best_fit:
-                    best_fit = fitness
+                elif score>best_fit:
+                    best_fit = score
                     best_chromosome = chromosome[:]
                     best_path = path[:]
+                    self.boards = [np.copy(b) for b in boards]
 
 
             new_population = []
