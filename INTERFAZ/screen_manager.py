@@ -23,7 +23,7 @@ class ScreenManager:
             if result[0] == 'simulation' and isinstance(result, tuple):
                 if result[2] == 'dstar':
                     ResourceManager.stop_music()
-                    self.screens[result[0]].load_DStarlite(result[1], surface)
+                    self.screens[result[0]].load_DStarlite(10, surface)
                     self.current_screen = result[0]
                 if result[2] == 'genetic':
                     ResourceManager.stop_music()
