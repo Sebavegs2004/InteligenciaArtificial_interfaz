@@ -229,5 +229,3 @@ def map_value(x):
     x1, x2 = 10, 50
     y1, y2 = 0.4, 0.05
     return y1 + (x - x1) * (y2 - y1) / (x2 - x1)
-
-

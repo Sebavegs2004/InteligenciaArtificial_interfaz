@@ -4,6 +4,7 @@ import numpy as np
 import pygame
 import random as rd
 from LOGICA.DStarlite import run_DStarlite
+from LOGICA.GeneticAlgorithm import GeneticAlgorithm
 from button import Button
 import sys
 from INTERFAZ.resource_manager import ResourceManager
@@ -142,6 +143,50 @@ class Simulation:
         sound.set_volume(0.5)
         sound.play()
         self.prize = pygame.transform.scale(ResourceManager.image_load('premio.png'), (self.size_tile, self.size_tile))
+
+    def load_GeneticAlgorithm(self, size, surface):
+        population_size = 50
+        num_generations = 50
+        chromosome_length = 100
+        mutation_rate = 0.01
+        crossover_rate = 0.4
+
+        results = GeneticAlgorithm(self.size, population_size, num_generations, chromosome_length, mutation_rate, crossover_rate)
+        self.prize_activated = False
+        self.surface = surface
+        self.running = 0
+        self.iteracion = 1
+        self.end = results[1]
+        self.size = size
+        self.walls = results[3]
+        self.map = np.zeros((size + 2, size + 2), dtype=int)
+        self.size_map = len(self.map[0])
+        self.size_tile = int(676 / self.size_map)
+        self.set_borders()
+        for x in range(size):
+            for y in range(size):
+                self.map[y + 1][x + 1] = self.walls[0][y][x]
+        self.agent = Agente((46 + (results[0][1] + 1) * self.size_tile, 22 + (results[0][0]) * self.size_tile), 'trans', results[2], self.size_tile, results[0])
+        self.agent_start_point = (self.agent.x, self.agent.y)
+        self.tile_sprites = [pygame.transform.scale(ResourceManager.image_load('sand.png'), (self.size_tile, self.size_tile)).convert(), # 0
+                             pygame.transform.scale(ResourceManager.image_load('wall.png'), (self.size_tile, self.size_tile)).convert(), # 1
+                             pygame.transform.scale(ResourceManager.image_load('wall_corner_ul.png'), (self.size_tile, self.size_tile)).convert(),
+                             pygame.transform.scale(ResourceManager.image_load('wall_up.png'), (self.size_tile, self.size_tile)).convert(),
+                             pygame.transform.scale(ResourceManager.image_load('wall_corner_ur.png'), (self.size_tile, self.size_tile)).convert(),
+                             pygame.transform.scale(ResourceManager.image_load('wall_right.png'), (self.size_tile, self.size_tile)).convert(),
+                             pygame.transform.scale(ResourceManager.image_load('wall_corner_dr.png'), (self.size_tile, self.size_tile)).convert(),
+                             pygame.transform.scale(ResourceManager.image_load('wall_down.png'), (self.size_tile, self.size_tile)).convert(),
+                             pygame.transform.scale(ResourceManager.image_load('wall_corner_dl.png'), (self.size_tile, self.size_tile)).convert(),
+                             pygame.transform.scale(ResourceManager.image_load('wall_left.png'), (self.size_tile, self.size_tile)).convert()]
+
+        self.start_ticks = pygame.time.get_ticks()
+        sound = ResourceManager.sound_load('go123.mp3')
+        sound.set_volume(0.5)
+        sound.play()
+        self.prize = pygame.transform.scale(ResourceManager.image_load('premio.png'), (self.size_tile, self.size_tile))
+
+
+
 
 
     def reload_map(self):
