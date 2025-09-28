@@ -8,7 +8,7 @@ from LOGICA.GeneticAlgorithm import GeneticAlgorithm
 from button import Button
 import sys
 from INTERFAZ.resource_manager import ResourceManager
-
+import os
 from agent import Agente
 import Color
 import numpy
@@ -34,6 +34,7 @@ class Simulation:
         self.exit_button = Button(1080, 600, 'exit_button')
         self.agent_start_point = None
         self.surface = None
+        self.simulation = None
 
     def draw(self, surface):
         pygame.draw.rect(surface, Color.AZUL, (768, 0, 512, 720))
@@ -41,13 +42,10 @@ class Simulation:
         for x in range(self.size_map):
             for y in range(self.size_map):
                 surface.blit(self.tile_sprites[self.map[x][y]], (46 + y * self.size_tile, 22 + x * self.size_tile))
-        if self.running == 2:
+        if self.running == 1:
             if self.agent.move():
                 self.iteracion = self.iteracion + 1
                 self.reload_map()
-        elif self.running == 1:
-            self.reload_map()
-            self.running = 2
         if self.running == 0 and pygame.time.get_ticks() - self.start_ticks >= 3000:
             ResourceManager.music_load('death_report.mp3')
             self.running = 1
@@ -55,7 +53,7 @@ class Simulation:
         surface.blit(self.prize, (46 + (self.end[1] + 1) * self.size_tile, 22 + (self.end[0] + 1) * self.size_tile))
         self.agent.draw(surface)
 
-        if self.iteracion == len(self.walls) and not self.prize_activated:
+        if self.iteracion + 1 == len(self.walls) and not self.prize_activated:
             ResourceManager.stop_music()
             sound = ResourceManager.sound_load('prizemortadela.mp3')
             sound.play()
@@ -76,22 +74,20 @@ class Simulation:
             sound.play()
             self.agent.reset()
             self.reload_map()
-            self.iteracion = 1
             self.prize_activated = False
             ResourceManager.stop_music()
         if self.remake_button.click_event(events):
             ResourceManager.stop_music()
             pygame.mixer.stop()
-            self.load_DStarlite(self.size, self.surface)
+            if self.simulation == 'dstarlite':
+                self.load_DStarlite(self.size, self.surface)
+            else:
+                self.load_GeneticAlgorithm(self.size, self.surface)
         if self.exit_button.click_event(events):
             ResourceManager.stop_music()
             pygame.mixer.stop()
             ResourceManager.music_load('tvtime.mp3')
             return 'selection'
-
-
-
-
         return None
 
     def set_borders(self):
@@ -110,17 +106,19 @@ class Simulation:
     def load_DStarlite(self, size, surface):
         surface.blit(ResourceManager.image_load('loading.png').convert_alpha(), (400,240))
         pygame.display.flip()
+        self.simulation = 'dstarlite'
         results = run_DStarlite(size)
         self.prize_activated = False
         self.surface = surface
         self.running = 0
-        self.iteracion = 1
+        self.iteracion = 0
         self.end = results[1]
         self.size = size
         self.walls = results[3]
         self.map = np.zeros((size + 2, size + 2), dtype=int)
         self.size_map = len(self.map[0])
         self.size_tile = int(676 / self.size_map)
+        print(results[2])
         self.set_borders()
         for x in range(size):
             for y in range(size):
@@ -145,17 +143,21 @@ class Simulation:
         self.prize = pygame.transform.scale(ResourceManager.image_load('premio.png'), (self.size_tile, self.size_tile))
 
     def load_GeneticAlgorithm(self, size, surface):
+        surface.blit(ResourceManager.image_load('loading.png').convert_alpha(), (400,240))
+        pygame.display.flip()
         population_size = 50
         num_generations = 50
         chromosome_length = 100
         mutation_rate = 0.01
         crossover_rate = 0.4
 
-        results = GeneticAlgorithm(self.size, population_size, num_generations, chromosome_length, mutation_rate, crossover_rate)
+        genetic = GeneticAlgorithm(size, population_size, num_generations, chromosome_length, mutation_rate, crossover_rate)
+        results = genetic.run()
         self.prize_activated = False
         self.surface = surface
         self.running = 0
-        self.iteracion = 1
+        self.iteracion = 0
+        self.simulation = 'genetic'
         self.end = results[1]
         self.size = size
         self.walls = results[3]
@@ -184,6 +186,8 @@ class Simulation:
         sound.set_volume(0.5)
         sound.play()
         self.prize = pygame.transform.scale(ResourceManager.image_load('premio.png'), (self.size_tile, self.size_tile))
+        os.system('cls')
+        print(results[2])
 
 
 

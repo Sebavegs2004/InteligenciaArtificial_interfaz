@@ -228,5 +228,4 @@ class GeneticAlgorithm:
                     new_population.append(child2)
 
 
-
         return (self.start, self.goal, best_chromosome, self.boards)

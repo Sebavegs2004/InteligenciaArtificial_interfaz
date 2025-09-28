@@ -10,7 +10,7 @@ class Agente:
         self.pos = start
         self.x = 46 + (start[1] + 1) * self.size
         self.y = 22 + (start[0] + 1) * self.size
-        self.speed = 0.5
+        self.speed = 1
         self.movements = movements
         self.next_movement = 0
 

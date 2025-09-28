@@ -26,7 +26,9 @@ class ScreenManager:
                     self.screens[result[0]].load_DStarlite(result[1], surface)
                     self.current_screen = result[0]
                 if result[2] == 'genetic':
-                    pass
+                    ResourceManager.stop_music()
+                    self.screens[result[0]].load_GeneticAlgorithm(result[1], surface)
+                    self.current_screen = result[0]
             else:
                 self.current_screen = result
 
