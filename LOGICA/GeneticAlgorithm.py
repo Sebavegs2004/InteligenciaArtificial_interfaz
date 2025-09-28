@@ -65,7 +65,21 @@ class GeneticAlgorithm:
     def generate_initial_population(self):
         population = []
         for i in range(self.population_size):
-            chromosome = [random.randint(0, 3) for _ in range(self.chromosome_length)]
+            chromosome = []
+            for _ in range (self.chromosome_length):
+                value = random.randint(0,3)
+                # Mover hacia arriba
+                if value == 0:
+                    chromosome.append((-1, 0))
+                # Mover hacia derecha
+                elif value == 1:
+                    chromosome.append((0, 1))
+                # Mover hacia abajo
+                elif value == 2:
+                    chromosome.append((1, 0))
+                # Mover hacia izquierda
+                elif value == 3:
+                    chromosome.append((0, -1))
             population.append(chromosome)
         return population
 
@@ -79,7 +93,7 @@ class GeneticAlgorithm:
 
         for gene in chromosome:
             board = self.boards[i]
-            x_mov, y_mov = MOVES[gene]
+            x_mov, y_mov = gene
             new_x, new_y = x + x_mov, y + y_mov
 
             if not (0 <= new_x < self.size_board  and 0 <= new_y < self.size_board):
@@ -157,7 +171,19 @@ class GeneticAlgorithm:
         c = chromosome[:]
         for i in range(self.chromosome_length):
             if random.random() < self.mutation_rate:
-                c[i] = random.randint(0, 3)
+                value = random.randint(0,3)
+                # Mover hacia arriba
+                if value == 0:
+                    chromosome.append((-1, 0))
+                # Mover hacia derecha
+                elif value == 1:
+                    chromosome.append((0, 1))
+                # Mover hacia abajo
+                elif value == 2:
+                    chromosome.append((1, 0))
+                # Mover hacia izquierda
+                elif value == 3:
+                    chromosome.append((0, -1))
         return c
 
     def run(self):
@@ -200,5 +226,7 @@ class GeneticAlgorithm:
                 new_population.append(child1)
                 if len(new_population) < self.population_size:
                     new_population.append(child2)
+
+
 
         return (self.start, self.goal, best_chromosome, self.boards)
