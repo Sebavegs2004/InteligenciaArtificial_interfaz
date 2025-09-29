@@ -35,15 +35,15 @@ def add_fake_goals(grid, exit_count, start, goal):
     size_x, size_y = grid.shape
     fake_goals = []
     for _ in range(exit_count - 1):
-        fake_pos = [random.randint(0, size_x - 1), random.randint(0, size_y - 1)]
+        fake_pos = (random.randint(0, size_x - 1), random.randint(0, size_y - 1))
         while fake_pos == start or fake_pos == goal or fake_pos in fake_goals:
-            fake_pos = [random.randint(0, size_x - 1), random.randint(0, size_y - 1)]
+            fake_pos = (random.randint(0, size_x - 1), random.randint(0, size_y - 1))
         fake_goals.append(fake_pos)
     return fake_goals
 
 def map_value(x):
-    x1, x2 = 10, 50
-    y1, y2 = 0.4, 0.05
+    x1, x2 = 5, 50
+    y1, y2 = 0.5, 0.05
     return y1 + (x - x1) * (y2 - y1) / (x2 - x1)
 
 # mapping: 0=Arriba,1=Derecha,2=Abajo,3=Izquierda
@@ -60,7 +60,7 @@ class GeneticAlgorithm:
         self.size_board = size
         self.board = np.zeros((self.size_board, self.size_board), dtype=int)
         self.start = (0,0)
-        self.goal = (random.randint(9, size - 1), random.randint(9, size - 1))
+        self.goal = (random.randint(4, size - 1), random.randint(4, size - 1))
         self.boards = []
         while self.goal == self.start:
             self.goal = (random.randint(0, size - 1), random.randint(0, size - 1))
@@ -221,7 +221,8 @@ class GeneticAlgorithm:
                     best_chromosome = chromosome[:] # guardamos una copia, chromosome original puede variar
                     best_path = path[:]
                     self.boards = [np.copy(b) for b in boards]
-                    return (self.start, self.goal, best_path, self.boards)
+                    print(self.fake_goals)
+                    return (self.start, self.goal, best_path, self.boards, self.fake_goals)
 
                 elif score>best_fit:
                     best_fit = score
@@ -242,4 +243,4 @@ class GeneticAlgorithm:
                     new_population.append(child2)
 
 
-        return (self.start, self.goal, best_path, self.boards)
+        return (self.start, self.goal, best_path, self.boards, self.fake_goals)

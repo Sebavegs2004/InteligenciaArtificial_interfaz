@@ -19,7 +19,7 @@ class GameMode:
         self.color_inactive = pygame.Color('lightskyblue3')
         self.color_active = pygame.Color('dodgerblue2')
         self.color = self.color_inactive
-        self.prompt_text = "Ingrese tamaño (10 <= x <= 50)"
+        self.prompt_text = "Ingrese tamaño (5 <= x <= 50)"
 
     def draw(self, surface, transition=0):
         # Dibujar botones
@@ -65,7 +65,7 @@ class GameMode:
         if self.dstar_button.click_event(events):
             if self.text.isdigit():  # validar input numérico
                 value = int(self.text)
-                if 10 <= value <= 50:
+                if 5 <= value <= 50:
                     ret = ('simulation', value, 'dstar')
                     self.text = ""
                     return ret
@@ -75,7 +75,7 @@ class GameMode:
         if self.genetic_button.click_event(events):
             if self.text.isdigit():
                 value = int(self.text)
-                if 10 <= value <= 50:
+                if 5 <= value <= 50:
                     ret = ('simulation', value, 'genetic')
                     self.text = ""
                     return ret

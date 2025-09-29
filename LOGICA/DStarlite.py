@@ -188,7 +188,7 @@ def run_DStarlite(size):
     while True:
         grid = np.zeros((size, size), dtype=int)
         start = (0,0)
-        goal = (random.randint(9, size - 1), random.randint(9, size - 1))
+        goal = (random.randint(4, size - 1), random.randint(4, size - 1))
 
         grids = []  # lista de tableros
         jugadas = []
@@ -226,6 +226,6 @@ def run_DStarlite(size):
     return (start, goal, jugadas, grids)
 
 def map_value(x):
-    x1, x2 = 10, 50
-    y1, y2 = 0.4, 0.05
+    x1, x2 = 5, 50
+    y1, y2 = 0.5, 0.05
     return y1 + (x - x1) * (y2 - y1) / (x2 - x1)

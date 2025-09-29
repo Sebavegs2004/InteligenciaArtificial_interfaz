@@ -35,6 +35,8 @@ class Simulation:
         self.agent_start_point = None
         self.surface = None
         self.simulation = None
+        self.fake = None
+        self.fake_pos = []
 
     def draw(self, surface):
         pygame.draw.rect(surface, Color.AZUL, (768, 0, 512, 720))
@@ -56,17 +58,29 @@ class Simulation:
             self.running = 1
 
         surface.blit(self.prize, (46 + (self.end[1] + 1) * self.size_tile, 22 + (self.end[0] + 1) * self.size_tile))
+        if self.fake_pos != []:
+            for x in self.fake_pos:
+                surface.blit(self.fake,(46 + (x[0] + 1) * self.size_tile, 22 + (x[1] + 1) * self.size_tile))
         self.agent.draw(surface)
 
         if self.iteracion + 1 == len(self.walls) and not self.prize_activated:
-            ResourceManager.stop_music()
-            sound = ResourceManager.sound_load('prizemortadela.mp3')
-            sound.play()
-            self.prize_activated = True  # marca que ya se reprodujo
+            if self.agent.pos == self.end:
+                ResourceManager.stop_music()
+                sound = ResourceManager.sound_load('prizemortadela.mp3')
+                sound.play()
+                self.prize_activated = True  # marca que ya se reprodujo
+            else:
+                ResourceManager.stop_music()
+                sound = ResourceManager.sound_load('sad.mp3')
+                sound.play()
+                self.prize_activated = True
 
         self.reset_button.draw(surface)
         self.remake_button.draw(surface)
         self.exit_button.draw(surface)
+    
+
+            
 
     def handle_events(self, events):
         if self.reset_button.click_event(events):
@@ -109,6 +123,7 @@ class Simulation:
         return
 
     def load_DStarlite(self, size, surface):
+        self.fake_pos = []
         surface.blit(ResourceManager.image_load('loading.png').convert_alpha(), (400,240))
         pygame.display.flip()
         self.simulation = 'dstarlite'
@@ -150,7 +165,7 @@ class Simulation:
         surface.blit(ResourceManager.image_load('loading.png').convert_alpha(), (400,240))
         pygame.display.flip()
         population_size = 50
-        num_generations = 10
+        num_generations = 1000
         chromosome_length = 50
         mutation_rate = 0.01
         crossover_rate = 0.4
@@ -164,6 +179,7 @@ class Simulation:
         self.iteracion = 0
         self.simulation = 'genetic'
         self.end = results[1]
+        print(self.end)
         print(len(results[2]))
         self.size = size
         self.walls = results[3]
@@ -192,6 +208,8 @@ class Simulation:
         sound.set_volume(0.5)
         sound.play()
         self.prize = pygame.transform.scale(ResourceManager.image_load('premio.png'), (self.size_tile, self.size_tile))
+        self.fake = pygame.transform.scale(ResourceManager.image_load('premio_fake.png'), (self.size_tile, self.size_tile))
+        self.fake_pos = results[4]
 
 
 
