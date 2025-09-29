@@ -3,7 +3,7 @@ from importlib import reload
 import numpy as np
 import pygame
 import random as rd
-from LOGICA.DStarlite import run_DStarlite
+from LOGICA.DStarlite import run_DStarLite
 from LOGICA.GeneticAlgorithm import GeneticAlgorithm
 from button import Button
 import sys
@@ -107,7 +107,7 @@ class Simulation:
         surface.blit(ResourceManager.image_load('loading.png').convert_alpha(), (400,240))
         pygame.display.flip()
         self.simulation = 'dstarlite'
-        results = run_DStarlite(size)
+        results = run_DStarLite(size)
         self.prize_activated = False
         self.surface = surface
         self.running = 0

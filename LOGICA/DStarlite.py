@@ -185,53 +185,62 @@ class DStarLite:
         return path
 
 
-def run_DStarlite(size):
+def run_DStarLite(size):
     while True:
-        os.system('cls')
-        print(f'NUEVA ITERACION {'-'*50}')
         grid = np.zeros((size, size), dtype=int)
-        start = (0,0)
+        start = (0, 0)
         goal = (random.randint(4, size - 1), random.randint(4, size - 1))
-
-        grids = []  # lista de tableros
-        jugadas = []
         while goal == start:
             goal = (random.randint(0, size - 1), random.randint(0, size - 1))
+
+        grids = []
+        jugadas = []
+
         current_start = start
-        
-        grid = add_random_obstacles(grid, prob=map_value(size), start=current_start, goal=goal)
+        grid = add_random_obstacles(grid, prob=0.5, start=current_start, goal=goal)
         grids.append(np.copy(grid))
-        print(current_start)
-        print(grid) # Mapa
+
         dstar = DStarLite(grid, current_start, goal)
-        path = dstar.plan() # Pensar
-        caminos = []
-        if path is not None:
-            for step in path[1:]:
-                current_start = step # Moverse
-                jugadas.append(step)
-                print(step)
-                if grid[step[0]][step[1]] == 1:
-                    print("ENCIMMMMMMAAAAAA DE MUROOOOOOOOOOOOO")
-                grid = move_obstacles(grid, prob=0.5, start=current_start, goal=goal) # Mapa
-                grids.append(np.copy(grid))
-                print(grid)
-    
-                dstar = DStarLite(grid, current_start, goal)
-                new_path = dstar.plan() # Pensar
-                if new_path is None:
-                    break
-                else:
-                    path = new_path
+        dstar.compute_shortest_path()
 
-            if current_start == goal:
+        if dstar.g[current_start] == math.inf:
+            continue
+
+        def get_next_from_g(dstar, s):
+            min_cost = math.inf
+            next_s = None
+            for sp in dstar.neighbors(s):
+                cost = dstar.cost(s, sp) + dstar.g[sp]
+                if cost < min_cost:
+                    min_cost = cost
+                    next_s = sp
+            return next_s
+
+        while current_start != goal:
+            next_s = get_next_from_g(dstar, current_start)
+            if next_s is None:
                 break
-            pass
+            current_start = next_s
+            jugadas.append(current_start)
 
-        else:
-            pass
+            grid = move_obstacles(grid, prob=0.4, start=current_start, goal=goal)
+            grids.append(np.copy(grid))
 
-    return (start, goal, jugadas, grids)
+            dstar.k_m += manhattan(dstar.s_last, current_start)
+            dstar.s_last = current_start
+            dstar.start = current_start
+
+            for x in range(size):
+                for y in range(size):
+                    if grid[x][y] != dstar.grid[x][y]:
+                        dstar.grid[x][y] = grid[x][y]
+                        dstar.update_vertex((x, y))
+
+            dstar.compute_shortest_path()
+
+        if current_start == goal:
+            return start, goal, jugadas, grids
+
 
 def map_value(x):
     x1, x2 = 5, 50
