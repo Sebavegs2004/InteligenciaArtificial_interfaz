@@ -59,15 +59,13 @@ class GeneticAlgorithm:
         # Tablero
         self.size_board = size
         self.board = np.zeros((self.size_board, self.size_board), dtype=int)
-        self.start = (0,0)
-        self.goal = (random.randint(4, size - 1), random.randint(4, size - 1))
+        self.start = (int(size / 2),int(size / 2))
+        self.goal = (random.randint(0, size - 1), random.randint(0, size - 1))
         self.boards = []
         while self.goal == self.start:
             self.goal = (random.randint(0, size - 1), random.randint(0, size - 1))
-
         self.fake_goals = add_fake_goals(self.board, 2, self.start, self.goal)
         self.board = add_random_obstacles(self.board, map_value(self.size_board), self.start, self.goal, self.fake_goals)
-
         self.population_size = population_size
         self.num_generations = num_generations
         self.chromosome_length = chromosome_length - 1 # Debe ser -1 porque son movimientos, y nuestro path debe tener largo chromosome_length
@@ -123,6 +121,8 @@ class GeneticAlgorithm:
                     if (x,y) == self.goal:
                         reached = True
                         steps+=1
+                        board = move_obstacles(board, 0.2, (x, y), self.goal, self.fake_goals)
+                        boards.append(np.copy(board))
                         break
                     elif (x,y) == self.fake_goals:
                         penalties += 2

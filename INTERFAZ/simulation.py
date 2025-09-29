@@ -165,11 +165,10 @@ class Simulation:
         surface.blit(ResourceManager.image_load('loading.png').convert_alpha(), (400,240))
         pygame.display.flip()
         population_size = 50
-        num_generations = 1000
+        num_generations = 50
         chromosome_length = 50
         mutation_rate = 0.01
         crossover_rate = 0.4
-
         genetic = GeneticAlgorithm(size, population_size, num_generations, chromosome_length, mutation_rate, crossover_rate)
         results = genetic.run()
         print(results[2])
@@ -179,7 +178,7 @@ class Simulation:
         self.iteracion = 0
         self.simulation = 'genetic'
         self.end = results[1]
-        print(self.end)
+        print(len(results[3]))
         print(len(results[2]))
         self.size = size
         self.walls = results[3]

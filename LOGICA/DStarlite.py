@@ -187,8 +187,8 @@ class DStarLite:
 def run_DStarlite(size):
     while True:
         grid = np.zeros((size, size), dtype=int)
-        start = (0,0)
-        goal = (random.randint(4, size - 1), random.randint(4, size - 1))
+        start = (int(size/2),int(size/2))
+        goal = (random.randint(0, size - 1), random.randint(0, size - 1))
 
         grids = []  # lista de tableros
         jugadas = []
