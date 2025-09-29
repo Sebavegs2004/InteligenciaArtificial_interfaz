@@ -9,7 +9,7 @@ def add_random_obstacles(grid, prob, start, goal):
     size_x, size_y = grid.shape
     for x in range(size_x):
         for y in range(size_y):
-            if (x, y) != start and (x, y) != goal:
+            if (x, y) != start and (x, y) not in goal:
                 if random.random() < prob:
                     grid[x][y] = 1
                 else:
@@ -28,7 +28,7 @@ def move_obstacles(grid, prob, start, goal):
             for dx, dy in directions:
                 nx, ny = x + dx, y + dy
                 if 0 <= nx < size_x and 0 <= ny < size_y:
-                    if grid[nx][ny] == 0 and (nx, ny) != start and (nx, ny) != goal:
+                    if grid[nx][ny] == 0 and (nx, ny) != start and (nx, ny) not in goal:
                         grid[nx][ny] = 1
                         grid[x][y] = 0
                         break
@@ -192,14 +192,15 @@ def run_DStarLite(size, num_goals=5):
             current_start = start
             goals = []
             for _ in range(num_goals):
-                g = (random.randint(4, size-1), random.randint(4, size-1))
+                g = (random.randint(0, size-1), random.randint(0, size-1))
                 while g == start:
                     g = (random.randint(0, size-1), random.randint(0, size-1))
                 goals.append(g)
             real_goal = random.choice(goals)
+            fake_goals = np.copy(goals)
             grids = []
             jugadas = []
-            grid = add_random_obstacles(grid, prob=0.5, start=current_start, goal=real_goal)
+            grid = add_random_obstacles(grid, prob=map_value(size), start=current_start, goal=goals)
             grids.append(np.copy(grid))
             remaining_goals = goals.copy()
             while remaining_goals:
@@ -229,7 +230,7 @@ def run_DStarLite(size, num_goals=5):
                     current_start = next_s
                     jugadas.append(current_start)
 
-                    grid = move_obstacles(grid, prob=0.4, start=current_start, goal=goal)
+                    grid = move_obstacles(grid, prob=0.4, start=current_start, goal=goals)
                     grids.append(np.copy(grid))
 
                     dstar.k_m += manhattan(dstar.s_last, current_start)
@@ -245,12 +246,14 @@ def run_DStarLite(size, num_goals=5):
                     dstar.compute_shortest_path()
 
                 if current_start == real_goal:
-                    return start, real_goal, jugadas, grids, goals
+                    mask = [not np.array_equal(g, real_goal) for g in fake_goals]
+                    fake_goals = fake_goals[mask]
+                    return start, real_goal, jugadas, grids, fake_goals
                 else:
                     remaining_goals.remove(goal)
 
 
 def map_value(x):
     x1, x2 = 5, 50
-    y1, y2 = 0.5, 0.05
+    y1, y2 = 0.4, 0.1
     return y1 + (x - x1) * (y2 - y1) / (x2 - x1)

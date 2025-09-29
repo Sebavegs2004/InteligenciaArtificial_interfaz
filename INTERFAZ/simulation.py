@@ -35,6 +35,9 @@ class Simulation:
         self.agent_start_point = None
         self.surface = None
         self.simulation = None
+        self.prize = None
+        self.fake = None
+        self.fake_pos = None
 
     def draw(self, surface):
         pygame.draw.rect(surface, Color.AZUL, (768, 0, 512, 720))
@@ -44,20 +47,37 @@ class Simulation:
                 surface.blit(self.tile_sprites[self.map[x][y]], (46 + y * self.size_tile, 22 + x * self.size_tile))
         if self.running == 1:
             if self.agent.move():
-                self.iteracion = self.iteracion + 1
-                self.reload_map()
+                self.start_ticks = pygame.time.get_ticks()
+                self.running = 2
+    
         if self.running == 0 and pygame.time.get_ticks() - self.start_ticks >= 3000:
             ResourceManager.music_load('death_report.mp3')
             self.running = 1
+        if self.running == 2 and pygame.time.get_ticks() - self.start_ticks >= 300:
+            self.iteracion = self.iteracion + 1
+            self.reload_map()
+            self.running = 1
 
         surface.blit(self.prize, (46 + (self.end[1] + 1) * self.size_tile, 22 + (self.end[0] + 1) * self.size_tile))
+        if self.fake_pos != []:
+            for x in self.fake_pos:
+                surface.blit(self.fake,(46 + (x[1] + 1) * self.size_tile, 22 + (x[0] + 1) * self.size_tile))
         self.agent.draw(surface)
 
+        if self.agent.pos in self.fake_pos:
+            self.fake_pos.remove(self.agent.pos)
+
         if self.iteracion + 1 == len(self.walls) and not self.prize_activated:
-            ResourceManager.stop_music()
-            sound = ResourceManager.sound_load('prizemortadela.mp3')
-            sound.play()
-            self.prize_activated = True  # marca que ya se reprodujo
+            if self.agent.pos == self.end:
+                ResourceManager.stop_music()
+                sound = ResourceManager.sound_load('prizemortadela.mp3')
+                sound.play()
+                self.prize_activated = True  # marca que ya se reprodujo
+            else:
+                ResourceManager.stop_music()
+                sound = ResourceManager.sound_load('sad.mp3')
+                sound.play()
+                self.prize_activated = True
 
         self.reset_button.draw(surface)
         self.remake_button.draw(surface)
@@ -118,7 +138,6 @@ class Simulation:
         self.map = np.zeros((size + 2, size + 2), dtype=int)
         self.size_map = len(self.map[0])
         self.size_tile = int(676 / self.size_map)
-        print(results[2])
         self.set_borders()
         for x in range(size):
             for y in range(size):
@@ -141,13 +160,17 @@ class Simulation:
         sound.set_volume(0.3)
         sound.play()
         self.prize = pygame.transform.scale(ResourceManager.image_load('premio.png'), (self.size_tile, self.size_tile))
+        self.prize = pygame.transform.scale(ResourceManager.image_load('premio.png'), (self.size_tile, self.size_tile))
+        self.fake = pygame.transform.scale(ResourceManager.image_load('premio_fake.png'), (self.size_tile, self.size_tile))
+        self.fake_pos = results[4].tolist()
+        self.fake_pos = [tuple(x) for x in self.fake_pos]
 
     def load_GeneticAlgorithm(self, size, surface):
         surface.blit(ResourceManager.image_load('loading.png').convert_alpha(), (400,240))
         pygame.display.flip()
         population_size = 50
         num_generations = 50
-        chromosome_length = 100
+        chromosome_length = 50
         mutation_rate = 0.01
         crossover_rate = 0.4
         genetic = GeneticAlgorithm(size, population_size, num_generations, chromosome_length, mutation_rate, crossover_rate)
@@ -158,8 +181,6 @@ class Simulation:
         self.iteracion = 0
         self.simulation = 'genetic'
         self.end = results[1]
-        print(len(results[2]))
-        print(len(results[3]))
         self.size = size
         self.walls = results[3]
         self.map = np.zeros((size + 2, size + 2), dtype=int)
@@ -187,6 +208,10 @@ class Simulation:
         sound.set_volume(0.5)
         sound.play()
         self.prize = pygame.transform.scale(ResourceManager.image_load('premio.png'), (self.size_tile, self.size_tile))
+        self.fake = pygame.transform.scale(ResourceManager.image_load('premio_fake.png'), (self.size_tile, self.size_tile))
+        self.fake_pos = results[4]
+
+
 
     def reload_map(self):
         if self.iteracion < len(self.walls):

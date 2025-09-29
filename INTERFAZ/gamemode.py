@@ -19,7 +19,7 @@ class GameMode:
         self.color_inactive = pygame.Color('lightskyblue3')
         self.color_active = pygame.Color('dodgerblue2')
         self.color = self.color_inactive
-        self.prompt_text = "Ingrese tamaño (10 <= x <= 50)"
+        self.prompt_text = "Ingrese tamaño (5 <= x <= 50)"
 
     def draw(self, surface, transition=0):
         # Dibujar botones
