@@ -27,7 +27,7 @@ class MainMenu:
         surface.blit(self.trans, self.pos)
         if self.activate == 1:
             surface.blit(self.screamer, (0,0))
-            self.alpha -= 5
+            self.alpha -= 4
             if self.alpha >= 0:
                 self.screamer.set_alpha(self.alpha)
             else:

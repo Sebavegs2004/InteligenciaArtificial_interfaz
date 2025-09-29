@@ -54,7 +54,7 @@ class GameMode:
             if self.text.isdigit():  # validar input numérico
                 value = int(self.text)
                 if 5 <= value <= 50:
-                    self.text = ""
+                    self.text = "INGRESE TAMAÑO"
                     return ('simulation', value, 'dstar')
                 else:
                     self.text = "[ERROR]: FUERA DE RANGO"
@@ -66,7 +66,7 @@ class GameMode:
             if self.text.isdigit():
                 value = int(self.text)
                 if 5 <= value <= 50:
-                    self.text = ""
+                    self.text = "INGRESE TAMAÑO"
                     return ('simulation', value, 'genetic')
                 else:
                     self.text = "[ERROR]: FUERA DE RANGO"
