@@ -39,10 +39,16 @@ class Simulation:
         self.fake = None
         self.fake_pos = None
         self.fake_pos_draw = None
-        self.canal = None
+        self.agent_reaction_state = 0
+        self.font = pygame.font.SysFont("Arial", 36)
+        self.reaction_text = self.font.render("Agent live reaction", False, Color.BLANCO)
+        self.walking_reaction = pygame.transform.scale(ResourceManager.image_load('agent_running.jpeg'), (472, 300)).convert()
+        self.thinking_reaction = pygame.transform.scale(ResourceManager.image_load('agent_think.png'), (472, 300)).convert()
+        self.win_reaction = pygame.transform.scale(ResourceManager.image_load('agent_win.jpeg'), (472, 300)).convert()
+        self.sad_reaction = pygame.transform.scale(ResourceManager.image_load('agent_sad.jpg'), (472, 300)).convert()
 
     def draw(self, surface):
-        pygame.draw.rect(surface, Color.AZUL, (768, 0, 512, 720))
+        pygame.draw.rect(surface, Color.GRAFITO, (768, 0, 512, 720))
         # if self.iteracion != len(self.walls) - 1:
         for x in range(self.size_map):
             for y in range(self.size_map):
@@ -51,14 +57,37 @@ class Simulation:
             if self.agent.move():
                 self.start_ticks = pygame.time.get_ticks()
                 self.running = 2
+                if self.agent.rep_pos():
+                    self.agent_reaction_state = 1
+                else:
+                    self.agent_reaction_state = 0
+
+        if self.simulation == 'genetic':
+            surface.blit(self.reaction_text, (800, 10))
+            if self.agent_reaction_state == 0:
+                surface.blit(self.walking_reaction, (788 , 60))
+            if self.agent_reaction_state == 1:
+                surface.blit(self.thinking_reaction, (788, 60))
+            if self.agent_reaction_state == 2:
+                surface.blit(self.win_reaction, (788, 60))
+            if self.agent_reaction_state == 3:
+                surface.blit(self.sad_reaction, (788, 60))
+
     
         if self.running == 0 and pygame.time.get_ticks() - self.start_ticks >= 3000:
             ResourceManager.music_load('death_report.mp3')
             self.running = 1
-        if self.running == 2 and pygame.time.get_ticks() - self.start_ticks >= 300:
-            self.iteracion = self.iteracion + 1
-            self.reload_map()
-            self.running = 1
+        if self.running == 2:
+            if self.agent_reaction_state == 1:
+                if pygame.time.get_ticks() - self.start_ticks >= 1000:
+                    self.iteracion = self.iteracion + 1
+                    self.reload_map()
+                    self.running = 1
+            else:
+                if pygame.time.get_ticks() - self.start_ticks >= 300:
+                    self.iteracion = self.iteracion + 1
+                    self.reload_map()
+                    self.running = 1
 
         if not self.prize_activated:
             surface.blit(self.prize, (46 + (self.end[1] + 1) * self.size_tile, 22 + (self.end[0] + 1) * self.size_tile))
@@ -75,13 +104,15 @@ class Simulation:
             if self.agent.pos == self.end:
                 ResourceManager.stop_music()
                 sound = ResourceManager.sound_load('prizemortadela.mp3')
-                self.canal = sound.play()
+                sound.play()
                 self.prize_activated = True  # marca que ya se reprodujo
+                self.agent_reaction_state = 2
             else:
                 ResourceManager.stop_music()
                 sound = ResourceManager.sound_load('sad.mp3')
                 sound.play()
                 self.prize_activated = True
+                self.agent_reaction_state = 3
             
         self.reset_button.draw(surface)
         self.remake_button.draw(surface)
@@ -92,6 +123,7 @@ class Simulation:
             pygame.mixer.stop()
             self.running = 0
             self.iteracion = 0
+            self.repeat = False
             self.start_ticks = pygame.time.get_ticks()
             sound = ResourceManager.sound_load('go123.mp3')
             sound.set_volume(0.5)
@@ -174,7 +206,7 @@ class Simulation:
     def load_GeneticAlgorithm(self, size, surface):
         surface.blit(ResourceManager.image_load('loading.png').convert_alpha(), (400,240))
         pygame.display.flip()
-        population_size = 50
+        population_size = 120
         num_generations = 50
         chromosome_length = 50
         mutation_rate = 0.01
@@ -217,6 +249,7 @@ class Simulation:
         self.fake = pygame.transform.scale(ResourceManager.image_load('premio_fake.png'), (self.size_tile, self.size_tile))
         self.fake_pos = results[4]
         self.fake_pos_draw = results[4]
+        self.agent_reaction_state = 0
 
 
 

@@ -302,6 +302,9 @@ def run_DStarLite(size, num_goals=5):
                                 dstar.update_vertex((x, y))
 
                     dstar.compute_shortest_path()
+                    if current_start == real_goal:
+                        break
+
 
                 if current_start == real_goal:
                     mask = [not np.array_equal(g, real_goal) for g in fake_goals]

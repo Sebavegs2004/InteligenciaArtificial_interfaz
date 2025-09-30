@@ -40,3 +40,9 @@ class Agente:
         self.y = 22 + (self.pos[0] + 1) * self.size
         self.next_movement = 0
         self.printed = 1
+
+    def rep_pos(self):
+        if self.next_movement != len(self.movements):
+            if self.pos == self.movements[self.next_movement]:
+                return True
+            return False
