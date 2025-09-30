@@ -66,7 +66,7 @@ def map_value(x):
         Probabilidad de obstáculo (entre 0.1 y 0.4).
     """
     x1, x2 = 5, 50
-    y1, y2 = 0.4, 0.1
+    y1, y2 = 0.4, 0.05
     return y1 + (x - x1) * (y2 - y1) / (x2 - x1)
 
 # mapping: 0=Arriba,1=Derecha,2=Abajo,3=Izquierda

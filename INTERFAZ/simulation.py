@@ -12,7 +12,6 @@ import os
 from agent import Agente
 import Color
 import numpy
-import random
 
 
 class Simulation:
@@ -33,28 +32,20 @@ class Simulation:
         self.reset_button = Button(896, 410, 'reset')
         self.remake_button = Button(896, 500, 'remake')
         self.exit_button = Button(1080, 600, 'exit_button')
-        self.dontgiveup_button = Button (256, 600, 'dontgiveup_button')
         self.agent_start_point = None
         self.surface = None
         self.simulation = None
         self.prize = None
         self.fake = None
-        size = (376, 240)
         self.fake_pos = None
         self.fake_pos_draw = None
         self.agent_reaction_state = 0
         self.font = pygame.font.SysFont("Arial", 36)
-        self.reaction_text = self.font.render("Agent live reaction:", False, Color.BLANCO)
-        self.walking_reaction = pygame.transform.scale(ResourceManager.image_load('agent_running.jpeg'), size).convert()
-        self.thinking_reaction = pygame.transform.scale(ResourceManager.image_load('agent_think.png'), size).convert()
-        self.win_reaction = pygame.transform.scale(ResourceManager.image_load('agent_win.jpeg'), size).convert()
-        self.sad_reaction = pygame.transform.scale(ResourceManager.image_load('agent_sad.jpg'), size).convert()
-        self.giveup_reaction = pygame.transform.scale(ResourceManager.image_load('agent_giveup.png'), size).convert()
-        self.prob_dontgiveup = 1
-        self.dontgiveup_trigger = -1
-        self.trigger_memory = 0
-
-
+        self.reaction_text = self.font.render("Agent live reaction", False, Color.BLANCO)
+        self.walking_reaction = pygame.transform.scale(ResourceManager.image_load('agent_running.jpeg'), (472, 300)).convert()
+        self.thinking_reaction = pygame.transform.scale(ResourceManager.image_load('agent_think.png'), (472, 300)).convert()
+        self.win_reaction = pygame.transform.scale(ResourceManager.image_load('agent_win.jpeg'), (472, 300)).convert()
+        self.sad_reaction = pygame.transform.scale(ResourceManager.image_load('agent_sad.jpg'), (472, 300)).convert()
 
     def draw(self, surface):
         pygame.draw.rect(surface, Color.GRAFITO, (768, 0, 512, 720))
@@ -64,33 +55,25 @@ class Simulation:
                 surface.blit(self.tile_sprites[self.map[x][y]], (46 + y * self.size_tile, 22 + x * self.size_tile))
         if self.running == 1:
             if self.agent.move():
-                print(self.iteracion)
                 self.start_ticks = pygame.time.get_ticks()
                 self.running = 2
-                if self.agent.rep_pos() and self.running == 2:
+                if self.agent.rep_pos():
                     self.agent_reaction_state = 1
                 else:
                     self.agent_reaction_state = 0
-                if self.iteracion + 1 == self.dontgiveup_trigger and random.random() <= self.prob_dontgiveup:
-                    ResourceManager.stop_music()
-                    sound = ResourceManager.sound_load('sad.mp3')
-                    sound.play()
-                    self.agent_reaction_state = 3
-                    self.running = 3        
 
         if self.simulation == 'genetic':
             surface.blit(self.reaction_text, (800, 10))
             if self.agent_reaction_state == 0:
-                surface.blit(self.walking_reaction, (788+ 48 , 60))
+                surface.blit(self.walking_reaction, (788 , 60))
             if self.agent_reaction_state == 1:
-                surface.blit(self.thinking_reaction, (788+ 48 , 60))
+                surface.blit(self.thinking_reaction, (788, 60))
             if self.agent_reaction_state == 2:
-                surface.blit(self.win_reaction, (788+ 48 , 60))
+                surface.blit(self.win_reaction, (788, 60))
             if self.agent_reaction_state == 3:
-                surface.blit(self.sad_reaction, (788+ 48 , 60))
-            if self.agent_reaction_state == 4:
-                surface.blit(self.giveup_reaction, (788+ 48 , 60))
+                surface.blit(self.sad_reaction, (788, 60))
 
+    
         if self.running == 0 and pygame.time.get_ticks() - self.start_ticks >= 3000:
             ResourceManager.music_load('death_report.mp3')
             self.running = 1
@@ -129,26 +112,14 @@ class Simulation:
                 sound = ResourceManager.sound_load('sad.mp3')
                 sound.play()
                 self.prize_activated = True
-                self.agent_reaction_state =  3
-                
-        if self.running == 3:
-            if pygame.time.get_ticks() - self.start_ticks > 5500:
-                self.agent_reaction_state = 4
-                self.dontgiveup_button.draw(surface)
-
-        if self.running == 4:
-            pygame.draw.rect(surface, Color.NEGRO, (0, 0, 1280, 720))
-            if self.trigger_memory == 0 and pygame.time.get_ticks() - self.start_ticks > 2000:
-                ResourceManager.music_load('noterindas.mp3')
-                self.trigger_memory = 1
-                
-        if self.running != 4:
-            self.reset_button.draw(surface)
-            self.remake_button.draw(surface)
-            self.exit_button.draw(surface)
+                self.agent_reaction_state = 3
+            
+        self.reset_button.draw(surface)
+        self.remake_button.draw(surface)
+        self.exit_button.draw(surface)
 
     def handle_events(self, events):
-        if self.reset_button.click_event(events) and self.running < 4:
+        if self.reset_button.click_event(events):
             pygame.mixer.stop()
             self.running = 0
             self.iteracion = 0
@@ -158,27 +129,22 @@ class Simulation:
             sound.set_volume(0.5)
             sound.play()
             self.fake_pos_draw = self.fake_pos
-            self.agent_reaction_state = 0
             self.agent.reset()
             self.reload_map()
             self.prize_activated = False
             ResourceManager.stop_music()
-        if self.remake_button.click_event(events) and self.running < 4:
+        if self.remake_button.click_event(events):
             ResourceManager.stop_music()
             pygame.mixer.stop()
             if self.simulation == 'dstarlite':
                 self.load_DStarlite(self.size, self.surface)
             else:
                 self.load_GeneticAlgorithm(self.size, self.surface)
-        if self.exit_button.click_event(events) and self.running < 4:
+        if self.exit_button.click_event(events):
             ResourceManager.stop_music()
             pygame.mixer.stop()
             ResourceManager.music_load('tvtime.mp3')
             return 'selection'
-        if self.dontgiveup_button.click_event(events) and self.running == 3:
-            ResourceManager.sound_load('turn_off.mp3').play()
-            self.start_ticks = pygame.time.get_ticks()
-            self.running = 4
         return None
 
     def set_borders(self):
@@ -236,7 +202,6 @@ class Simulation:
         self.fake_pos = results[4].tolist()
         self.fake_pos = [tuple(x) for x in self.fake_pos]
         self.fake_pos_draw = self.fake_pos.copy()
-        self.agent_reaction_state = 0
 
     def load_GeneticAlgorithm(self, size, surface):
         surface.blit(ResourceManager.image_load('loading.png').convert_alpha(), (400,240))
@@ -253,10 +218,8 @@ class Simulation:
         self.running = 0
         self.iteracion = 0
         self.simulation = 'genetic'
-        print(len(results[2]))
         self.end = results[1]
         self.size = size
-        self.trigger_memory = 0
         self.walls = results[3]
         self.map = np.zeros((size + 2, size + 2), dtype=int)
         self.size_map = len(self.map[0])
@@ -287,10 +250,6 @@ class Simulation:
         self.fake_pos = results[4]
         self.fake_pos_draw = results[4]
         self.agent_reaction_state = 0
-        if len(results[2]) > 10:
-            self.dontgiveup_trigger = len(results[2]) - 6
-        else:
-            self.dontgiveup_trigger = -1
 
 
 
