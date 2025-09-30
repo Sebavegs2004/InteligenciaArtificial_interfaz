@@ -217,35 +217,6 @@ class DStarLite:
                             self.rhs[s] = min([self.cost(s, sp) + self.g[sp] for sp in self.neighbors(s)] or [math.inf])
                     self.update_vertex(s)
 
-    def plan(self):
-        """
-        Devuelve el camino desde el inicio hasta la meta.
-
-        Retorna
-        -------
-        list[tuple] | None
-            Secuencia de posiciones del camino, o None si no existe.
-        """
-        self.compute_shortest_path()
-        if self.g[self.start] == math.inf:
-            return None
-
-        path = [self.start]
-        s = self.start
-        while s != self.goal:
-            min_cost = math.inf
-            next_s = None
-            for sp in self.neighbors(s):
-                val = self.cost(s, sp) + self.g[sp]
-                if val < min_cost:
-                    min_cost = val
-                    next_s = sp
-            if next_s is None:
-                return None
-            s = next_s
-            path.append(s)
-        return path
-
 
 def run_DStarLite(size, num_goals=5):
         """
