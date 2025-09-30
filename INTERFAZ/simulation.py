@@ -206,9 +206,9 @@ class Simulation:
     def load_GeneticAlgorithm(self, size, surface):
         surface.blit(ResourceManager.image_load('loading.png').convert_alpha(), (400,240))
         pygame.display.flip()
-        population_size = 120
-        num_generations = 50
-        chromosome_length = 50
+        population_size = 100
+        num_generations = 100
+        chromosome_length = 150
         mutation_rate = 0.01
         crossover_rate = 0.4
         genetic = GeneticAlgorithm(size, population_size, num_generations, chromosome_length, mutation_rate, crossover_rate)
