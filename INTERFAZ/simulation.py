@@ -54,6 +54,7 @@ class Simulation:
         self.win_reaction = pygame.transform.scale(ResourceManager.image_load('agent_win.jpeg'), size).convert()
         self.sad_reaction = pygame.transform.scale(ResourceManager.image_load('agent_sad.jpg'), size).convert()
         self.giveup_reaction = pygame.transform.scale(ResourceManager.image_load('agent_giveup.png'), size).convert()
+        self.bad_eat = pygame.transform.scale(ResourceManager.image_load('bad_eat.png'), size).convert()
         self.memory1 = pygame.transform.scale(ResourceManager.image_load('memory1.jpeg'), (size[0], my)).convert()
         self.memory2 = pygame.transform.scale(ResourceManager.image_load('memory2.jpeg'), (size[0], my)).convert()
         self.memory3 = pygame.transform.scale(ResourceManager.image_load('memory3.jpeg'), (size[0], my)).convert()
@@ -121,6 +122,18 @@ class Simulation:
             if self.agent_reaction_state == 4:
                 surface.blit(self.giveup_reaction, (788+ 48 , 60))
 
+        if self.simulation == 'dstarlite':
+            surface.blit(self.reaction_text, (800, 10))
+            if self.agent_reaction_state == 0:
+                surface.blit(self.walking_reaction, (788+ 48 , 60))
+            if self.agent_reaction_state == 2:
+                surface.blit(self.win_reaction, (788+ 48 , 60))
+            if self.agent_reaction_state == 5:
+                surface.blit(self.bad_eat,  (788+ 48 , 60))
+            
+            
+
+
         if self.running == 0 and pygame.time.get_ticks() - self.start_ticks >= 3000:
             ResourceManager.music_load('death_report.mp3')
             self.running = 1
@@ -136,6 +149,8 @@ class Simulation:
                     self.reload_map()
                     self.running = 1
 
+        
+
         if not self.prize_activated:
             surface.blit(self.prize, (46 + (self.end[1] + 1) * self.size_tile, 22 + (self.end[0] + 1) * self.size_tile))
         if self.fake_pos_draw != []:
@@ -145,6 +160,7 @@ class Simulation:
 
         if self.agent.pos in self.fake_pos_draw:
             self.fake_pos_draw.remove(self.agent.pos)
+            self.agent_reaction_state = 5
             ResourceManager.sound_load('nom.mp3').play()
 
         if self.iteracion + 1 == len(self.walls) and not self.prize_activated:
