@@ -3,6 +3,16 @@ import numpy as np
 from constants import CellType
 
 def add_random_obstacles(grid, prob, start, goal, fake_goals):
+    """
+    Agrega obstáculos aleatorios al tablero (grid).
+    - grid: matriz numpy que representa el tablero.
+    - prob: probabilidad de que una celda se convierta en obstáculo.
+    - start: coordenadas de inicio.
+    - goal: coordenadas de la meta real.
+    - fake_goals: lista de metas falsas que no deben ser bloqueadas.
+
+    Retorna el grid modificado con obstáculos (1 = obstáculo, 0 = libre).
+    """
     size_x, size_y = grid.shape
     for x in range(size_x):
         for y in range(size_y):
@@ -42,8 +52,21 @@ def add_fake_goals(grid, exit_count, start, goal):
     return fake_goals
 
 def map_value(x):
+    """
+    Ecuacion de una recta que retorna la probabilidad de obstáculos en proporcion al tamaño de la grilla.
+
+    Parámetros
+    ----------
+    x : int
+        Tamaño de la grilla.
+
+    Retorna
+    -------
+    float
+        Probabilidad de obstáculo (entre 0.1 y 0.4).
+    """
     x1, x2 = 5, 50
-    y1, y2 = 0.4, 0.05
+    y1, y2 = 0.4, 0.1
     return y1 + (x - x1) * (y2 - y1) / (x2 - x1)
 
 # mapping: 0=Arriba,1=Derecha,2=Abajo,3=Izquierda
@@ -55,7 +78,18 @@ MOVES = {
 }
 
 class GeneticAlgorithm:
+    """
+    Implementa un algoritmo genético para encontrar un camino desde el inicio hasta la meta en un tablero con:
+    - Obstáculos dinámicos.
+    - Metas falsas.
+    """
     def __init__(self, size, population_size, num_generations, chromosome_length, mutation_rate, crossover_rate):
+        """
+        Inicializa el algoritmo:
+        - Crea el tablero, asigna inicio y meta.
+        - Agrega metas falsas y obstáculos.
+        - Genera la población inicial de cromosomas.
+        """
         # Tablero
         self.size_board = size
         self.board = np.zeros((self.size_board, self.size_board), dtype=int)
@@ -74,6 +108,10 @@ class GeneticAlgorithm:
         self.population = self.generate_initial_population()
 
     def generate_initial_population(self):
+        """
+        Genera la población inicial de cromosomas.
+        Cada cromosoma es una secuencia de movimientos (arriba, derecha, abajo, izquierda).
+        """
         population = []
         for i in range(self.population_size):
             chromosome = []
@@ -95,6 +133,16 @@ class GeneticAlgorithm:
         return population
 
     def simulate_chromosome(self, chromosome, board):
+        """
+        Simula un cromosoma moviéndose en el tablero.
+        Retorna:
+        - Posición final
+        - Camino recorrido
+        - Penalizaciones
+        - Cantidad de pasos
+        - Si llegó a la meta
+        - Evolución del tablero (con obstáculos dinámicos)
+        """
         (x, y) = self.start
         path = []
         penalties = 0
@@ -136,6 +184,12 @@ class GeneticAlgorithm:
         return (x,y), path, penalties, steps, reached, boards
 
     def fitness_func(self, pos_final, penalties, steps, reached):
+        """
+        Calcula el fitness de un cromosoma:
+        - Penaliza distancia a la meta (Manhattan).
+        - Penaliza pasos extra y colisiones.
+        - Recompensa fuertemente si alcanza la meta.
+        """
         (x,y) = pos_final
         # Distancia Manhattan
         x_final, y_final = self.goal
@@ -153,6 +207,9 @@ class GeneticAlgorithm:
         return score
 
     def select_parent(self, fitness_population):
+        """
+        Elige a los cromosomas, la probabilidad de ser elegido es proporcional al fitness.
+        """
         total = sum(fitness_population)
         if total == 0:
             return random.choice(self.population)
@@ -170,6 +227,10 @@ class GeneticAlgorithm:
         return self.population[-1]
 
     def crossover(self, parent1, parent2):
+        """
+        Cruce de un punto:
+        - Combina genes de dos padres en dos hijos.
+        """
         if random.random() < self.crossover_rate:
             # Se elige un punto de corte aleatorio
             idx = random.randint(1, self.chromosome_length - 1)
@@ -182,6 +243,10 @@ class GeneticAlgorithm:
         return child1, child2
 
     def mutate(self, chromosome):
+        """
+        Aplica mutación en algunos genes de un cromosoma.
+        Sustituye el movimiento por otro aleatorio con cierta probabilidad.
+        """
         c = chromosome[:]
         for i in range(self.chromosome_length):
             if random.random() < self.mutation_rate:
@@ -201,6 +266,13 @@ class GeneticAlgorithm:
         return c
 
     def run(self):
+        """
+        Ejecuta el algoritmo genético:
+        - Evalúa la población.
+        - Selecciona padres.
+        - Aplica cruce y mutación.
+        - Devuelve el mejor camino encontrado.
+        """
         # Tablero
         best_fit = -float('inf')
         best_chromosome = None
