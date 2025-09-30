@@ -82,7 +82,6 @@ class Simulation:
         self.memory_prize_alpha = 0
         self.trans_memory_alpha = 0
         self.memory_text_alpha = 0
-
         self.desaparecer = 0
 
 
@@ -121,6 +120,8 @@ class Simulation:
                 surface.blit(self.sad_reaction, (788+ 48 , 60))
             if self.agent_reaction_state == 4:
                 surface.blit(self.giveup_reaction, (788+ 48 , 60))
+            if self.agent_reaction_state == 5:
+                surface.blit(self.bad_eat,  (788+ 48 , 60))
 
         if self.simulation == 'dstarlite':
             surface.blit(self.reaction_text, (800, 10))
@@ -270,11 +271,6 @@ class Simulation:
                         self.desaparecer += 1
                 if self.desaparecer == 9 and pygame.time.get_ticks() - self.start_ticks > 26000:
                     self.running = 2
-
-
-
-            
-
                 
         if self.running != 4:
             self.reset_button.draw(surface)
@@ -434,8 +430,8 @@ class Simulation:
         self.fake_pos = results[4]
         self.fake_pos_draw = results[4]
         self.agent_reaction_state = 0
-        if len(results[2]) >= 30:
-            self.dontgiveup_trigger = len(results[2]) - 14
+        if len(results[2]) >= 30 and results[1] == results[2][len(results[2]) - 1]:
+            self.dontgiveup_trigger = len(results[2]) - int(len(results[2])*0.3)
         else:
             self.dontgiveup_trigger = -1
         self.trigger_memory = 0
@@ -447,6 +443,10 @@ class Simulation:
         self.memory_prize_alpha = 0
         self.trans_memory_alpha = 0
         self.memory_text_alpha = 0
+        self.memory_prize.set_alpha(0)
+        self.trans_memory.set_alpha(0)
+        self.memory_text.set_alpha(0)
+        self.agent_determination.set_alpha(0)
 
 
 
@@ -455,6 +455,7 @@ class Simulation:
             for x in range(self.size):
                 for y in range(self.size):
                     self.map[y + 1][x + 1] = self.walls[self.iteracion][y][x]
+
 
 
 
